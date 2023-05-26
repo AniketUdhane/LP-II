@@ -1,73 +1,70 @@
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def union(self, x, y):
+        root_x = self.find(x)
+        root_y = self.find(y)
+
+        if self.rank[root_x] < self.rank[root_y]:
+            self.parent[root_x] = root_y
+        elif self.rank[root_x] > self.rank[root_y]:
+            self.parent[root_y] = root_x
+        else:
+            self.parent[root_y] = root_x
+            self.rank[root_x] += 1
+
 class Graph:
     def __init__(self, vertices):
         self.V = vertices
-        self.graph = []
+        self.edges = []
 
-    def add_edge(self, src, dest, weight):
-        self.graph.append((src, dest, weight))
-
-    def find_parent(self, parent, i):
-        if parent[i] == i:
-            return i
-        return self.find_parent(parent, parent[i])
-
-    def union(self, parent, rank, x, y):
-        x_root = self.find_parent(parent, x)
-        y_root = self.find_parent(parent, y)
-
-        if rank[x_root] < rank[y_root]:
-            parent[x_root] = y_root
-        elif rank[x_root] > rank[y_root]:
-            parent[y_root] = x_root
-        else:
-            parent[y_root] = x_root
-            rank[x_root] += 1
+    def add_edge(self, u, v, weight):
+        self.edges.append((u, v, weight))
 
     def kruskal_mst(self):
-        result = []  # Store the MST
-        parent = []  # Track the parent of each vertex
-        rank = []  # Track the rank of each vertex
+        # Sort edges in ascending order of weight
+        self.edges.sort(key=lambda x: x[2])
 
-        self.graph = sorted(self.graph, key=lambda item: item[2])  # Sort edges by weight
+        mst = []
+        union_find = UnionFind(self.V)
 
-        for v in range(self.V):
-            parent.append(v)
-            rank.append(0)
+        for edge in self.edges:
+            u, v, weight = edge
 
-        i = 0  # Index variable to iterate through sorted edges
-        e = 0  # Variable to track the number of edges included in the MST
+            if union_find.find(u) != union_find.find(v):
+                # Add the edge to the MST
+                mst.append(edge)
+                union_find.union(u, v)
 
-        while e < self.V - 1:
-            src, dest, weight = self.graph[i]
-            i += 1
+        return mst
 
-            x = self.find_parent(parent, src)
-            y = self.find_parent(parent, dest)
+# User input to get the number of vertices and edges
+print("Enter the number of vertices:")
+num_vertices = int(input())
 
-            if x != y:
-                e += 1
-                result.append((src, dest, weight))
-                self.union(parent, rank, x, y)
+print("Enter the number of edges:")
+num_edges = int(input())
 
-        return result
+# Create a graph
+graph = Graph(num_vertices)
 
-    def print_mst(self, mst):
-        print("Edge \tWeight")
-        for src, dest, weight in mst:
-            print(f"{src} - {dest}\t{weight}")
+# User input to add edges and their weights
+print("Enter the edges and their weights (e.g., '0 1 5' means an edge between vertices 0 and 1 with weight 5):")
+for _ in range(num_edges):
+    u, v, weight = map(int, input().split())
+    graph.add_edge(u, v, weight)
 
+# Find and print the Minimum Spanning Tree (MST)
+mst = graph.kruskal_mst()
 
-# Example usage
-g = Graph(6)
-g.add_edge(0, 1, 4)
-g.add_edge(0, 2, 1)
-g.add_edge(1, 2, 2)
-g.add_edge(1, 3, 5)
-g.add_edge(2, 3, 2)
-g.add_edge(2, 4, 1)
-g.add_edge(3, 4, 3)
-g.add_edge(3, 5, 4)
-g.add_edge(4, 5, 1)
-
-mst = g.kruskal_mst()
-g.print_mst(mst)
+print("Edges of Minimum Spanning Tree:")
+for edge in mst:
+    u, v, weight = edge
+    print(u, "-", v, "\tWeight:", weight)

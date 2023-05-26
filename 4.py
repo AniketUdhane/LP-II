@@ -1,63 +1,39 @@
+#minimum spanning tree
 class Graph:
     def __init__(self, vertices):
         self.V = vertices
-        self.graph = []
-
-    def add_edge(self, src, dest, weight):
-        self.graph.append([src, dest, weight])
-
-    def find(self, parent, i):
-        if parent[i] == i:
-            return i
-        return self.find(parent, parent[i])
-
-    def union(self, parent, rank, x, y):
-        root_x = self.find(parent, x)
-        root_y = self.find(parent, y)
-
-        if rank[root_x] < rank[root_y]:
-            parent[root_x] = root_y
-        elif rank[root_x] > rank[root_y]:
-            parent[root_y] = root_x
-        else:
-            parent[root_y] = root_x
-            rank[root_x] += 1
-
-    def kruskal(self):
-        result = []
-        i = 0
-        e = 0
-
-        self.graph = sorted(self.graph, key=lambda item: item[2])
-
-        parent = []
-        rank = []
-
-        for node in range(self.V):
-            parent.append(node)
-            rank.append(0)
-
-        while e < self.V - 1:
-            src, dest, weight = self.graph[i]
-            i += 1
-            x = self.find(parent, src)
-            y = self.find(parent, dest)
-
-            if x != y:
-                e += 1
-                result.append([src, dest, weight])
-                self.union(parent, rank, x, y)
-
-        return result
-
-# Example usage
-g = Graph(4)
-g.add_edge(0, 1, 10)
-g.add_edge(0, 2, 6)
-g.add_edge(0, 3, 5)
-g.add_edge(1, 3, 15)
-g.add_edge(2, 3, 4)
-
-mst = g.kruskal()
-for edge in mst:
-    print(f"Edge: {edge[0]}-{edge[1]}, Weight: {edge[2]}")
+        self.graph = [[0 for column in range(vertices)] for row in range(vertices)]
+        
+    def printMST(self, parent):
+        print("Edge \tWeight")
+        for i in range(1, self.V):
+            print(parent[i], "-", i, "\t", self.graph[i][ parent[i] ])
+            
+    def minKey(self, key, mstSet):
+        min = float('inf')
+        for v in range(self.V):
+            if key[v] < min and mstSet[v] == False:
+                min = key[v]
+                min_index = v
+        return min_index
+    
+    def primMST(self):
+        key = [float('inf')] * self.V
+        parent = [None] * self.V
+        key[0] = 0
+        mstSet = [False] * self.V
+        parent[0] = -1
+        for cout in range(self.V):
+            u = self.minKey(key, mstSet)
+            mstSet[u] = True
+            for v in range(self.V):
+                if self.graph[u][v] > 0 and mstSet[v] == False and key[v] > self.graph[u][v]:
+                    key[v] = self.graph[u][v]
+                    parent[v] = u
+        self.printMST(parent)
+        
+g = Graph(int(input("Enter the number of vertices: ")))
+for i in range(g.V):
+    for j in range(g.V):
+        g.graph[i][j] = int(input(f"Enter the weight of edge between {i} and {j}: "))
+g.primMST()

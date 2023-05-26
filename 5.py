@@ -1,58 +1,58 @@
+#single source shortest
 import sys
 
-class Graph:
-    def __init__(self, vertices):
-        self.V = vertices
-        self.graph = [[0] * vertices for _ in range(vertices)]
+# Function to find the vertex with the minimum distance value
+def minDistance(dist, visited):
+    min_dist = sys.maxsize
+    min_index = -1
+    for v in range(len(dist)):
+        if dist[v] < min_dist and not visited[v]:
+            min_dist = dist[v]
+            min_index = v
+    return min_index
 
-    def add_edge(self, src, dest, weight):
-        self.graph[src][dest] = weight
-        self.graph[dest][src] = weight
+# Function to print the shortest distance from the source to all vertices
+def printDistances(dist):
+    print("Vertex \t Distance from Source")
+    for i in range(len(dist)):
+        print(i, "\t\t", dist[i])
 
-    def find_min_distance(self, dist, visited):
-        min_distance = sys.maxsize
-        min_index = -1
+# Function to implement the greedy search algorithm
+def greedySearch(graph, source):
+    num_vertices = len(graph)
+    dist = [sys.maxsize] * num_vertices
+    visited = [False] * num_vertices
+    dist[source] = 0
+    
+    for i in range(num_vertices):
+        # Find the vertex with the minimum distance value
+        u = minDistance(dist, visited)
+        visited[u] = True
+        
+        # Update the distance values of the adjacent vertices
+        for v in range(num_vertices):
+            if graph[u][v] > 0 and not visited[v] and dist[v] > dist[u] + graph[u][v]:
+                dist[v] = dist[u] + graph[u][v]
+    
+    printDistances(dist)
 
-        for v in range(self.V):
-            if dist[v] < min_distance and not visited[v]:
-                min_distance = dist[v]
-                min_index = v
+# Main program
+if __name__ == '__main__':
+    # Get the number of vertices and edges
+    num_vertices = int(input("Enter the number of vertices: "))
+    num_edges = int(input("Enter the number of edges: "))
 
-        return min_index
-
-    def dijkstra(self, src):
-        dist = [sys.maxsize] * self.V
-        dist[src] = 0
-        visited = [False] * self.V
-
-        for _ in range(self.V):
-            u = self.find_min_distance(dist, visited)
-            visited[u] = True
-
-            for v in range(self.V):
-                if (
-                    self.graph[u][v] > 0
-                    and not visited[v]
-                    and dist[v] > dist[u] + self.graph[u][v]
-                ):
-                    dist[v] = dist[u] + self.graph[u][v]
-
-        return dist
-
-# Example usage
-g = Graph(6)
-g.add_edge(0, 1, 4)
-g.add_edge(0, 2, 1)
-g.add_edge(1, 2, 2)
-g.add_edge(1, 3, 5)
-g.add_edge(2, 3, 2)
-g.add_edge(2, 4, 1)
-g.add_edge(3, 4, 3)
-g.add_edge(3, 5, 4)
-g.add_edge(4, 5, 1)
-
-src = 0
-distances = g.dijkstra(src)
-
-for v in range(g.V):
-    print(f"Distance from source vertex {src} to vertex {v}: {distances[v]}")
+    # Create the adjacency matrix
+    graph = [[0] * num_vertices for _ in range(num_vertices)]
+    
+    # Get the graph data
+    for i in range(num_edges):
+        print("Enter the edge data in the format <from> <to> <weight>: ")
+        u, v, w = map(int, input().split())
+        graph[u][v] = w
+    
+    # Get the source vertex
+    source = int(input("Enter the source vertex: "))
+    
+    # Find the shortest distances from the source vertex to all other vertices
+    greedySearch(graph, source)
